@@ -117,47 +117,6 @@ function mkcd() {
 }
 
 ########################################
-# DevZero
-########################################
-alias a0t='export DEV0_AUTH0_TOKEN=$(auth0 test token -c BlR1iwdHe1x7otl2u0jOfsyRWeGQAqzo -a "https://devinfra.io/webapi" --no-input --force --format json)'
-function sse {
-	taid="${@:-ta-00000000000000000000000000000000}"
-	curl -vvv --request GET \
-		--location "https://api.devinfra.io/api/v0/sse/template_application/$taid/log_output" \
-		--header "Authorization: Bearer $DEV0_AUTH0_TOKEN"
-}
-function ssel {
-	taid="${@:-ta-00000000000000000000000000000000}"
-	curl -vvv --request GET \
-		--location "localhost:8443/api/v0/sse/template_application/$taid/log_output" \
-		--header "Authorization: Bearer $DEV0_AUTH0_TOKEN"
-}
-function cmds {
-	taid="${@:-ta-00000000000000000000000000000000}"
-	curl -vvv --request GET \
-		--location "https://api.devinfra.io/api/v0/sse/template_application/$taid/commands" \
-		--header "Authorization: Bearer $DEV0_AUTH0_TOKEN"
-}
-function cmdsl {
-	taid="${@:-ta-00000000000000000000000000000000}"
-	curl -vvv --request GET \
-		--location "localhost:8443/api/v0/sse/template_application/$taid/commands" \
-		--header "Authorization: Bearer $DEV0_AUTH0_TOKEN"
-}
-alias logs="a0t && sse"
-
-alias dzd="dps --filter 'label=org=devzero'"
-alias dzdl="dpsl --filter 'label=org=devzero'"
-alias mosh="mosh -P 60000"
-function msh {
-	echo "mosh -P 60000 devzero@$@.devinfra.dev0.run"
-	mosh -P 60000 "devzero@$@.devinfra.dev0.run"
-}
-alias tmt='time make test'
-alias tmtq='time make test-quick'
-alias tmts='time make test-short'
-
-########################################
 # NiFi
 ########################################
 alias llc="ll conf/"
@@ -1232,20 +1191,20 @@ export PATH=$PATH:${SCALA_BIN}
 ########################################
 # AWS CLI/Python
 ########################################
-PATH=~/Library/Python/3.6/bin/:${PATH}
-if command -v pyenv 1>/dev/null 2>&1; then
-  eval "$(pyenv init -)"
-fi
+# PATH=~/Library/Python/3.6/bin/:${PATH}
+# if command -v pyenv 1>/dev/null 2>&1; then
+#   eval "$(pyenv init -)"
+# fi
 
 ########################################
 # General Path Munging
 ########################################
 PATH=~/bin:/usr/local/bin:/usr/local/ssl/bin:${PATH}
 # Add openssl from brew before OS version
-export PATH="/usr/local/opt/openssl@1.1/bin:$PATH"
+# export PATH="/usr/local/opt/openssl@1.1/bin:$PATH"
 
 # Brew is now installed to a different directory
-export PATH="/Users/andylopresto/homebrew/bin:$PATH"
+# export PATH="/Users/andylopresto/homebrew/bin:$PATH"
 
 # Clean up duplicates in PATH
 # export PATH=/usr/local/bin:/opt/local/bin:/opt/local/sbin:$PATH
