@@ -1,0 +1,1306 @@
+########################################
+# Imported aliases & functions from 
+# ~/.bashrc_remote 2023-01-04
+########################################
+
+########################################
+# General Aliases
+########################################
+alias c="clear"
+alias cpr="cp -Rv"
+alias ll="ls -alGFh"
+alias la="ls -haltGF | head -n 20"
+alias lp="ls -p"
+alias lt="ll -t"
+alias lld="ls -alGd */"
+alias t="tree"
+alias tl="tree -alshCF --prune"
+alias tll="tl -L"
+alias pwp="pwd -P"
+alias h="history -50"
+alias hc="history | grep --color"
+alias sane="stty sane"
+alias tom="ps -ef | grep java | grep -P --color=always '(?<=Dcatalina\.base=)[^ ]*'"
+alias rq="ps -ef | grep --color"
+alias rm="rm -v"
+alias rmf="rm -rfv"
+alias k9="kill -9"
+alias retc="dscacheutil -flushcache"
+# alias path="echo $PATH"
+alias mkdir="mkdir -pv"
+alias wget="wget -c"
+# alias top="htop"
+# alias du="ncdu"
+alias myip="curl http://ipecho.net/plain; echo"
+alias today='date +"%e %b %Y"'
+alias lim="ulimit -a"
+alias rmt="find . -name target | xargs rm -vrf"
+alias ccd='echo "cd $(pwp)" | pbcopy' # Copies 'cd path/to/current/dir' to clipboard
+alias p="ping -c 1"
+
+function of() {
+	lsof | awk '{ print $2 " " $1; }' | sort -rn | uniq -c | sort -rn | head -20
+}
+
+function lsp() {
+	lsof -nP "-iTCP:$1" | grep LISTEN
+}
+
+# alias b64e="openssl base64 -e <<<"
+# alias b64d="openssl base64 -d -A <<<"
+
+function b64e() {
+	echo "$@" | base64
+}
+
+function b64d() {
+	echo "$@" | base64 --decode
+}
+
+alias sha1="openssl sha1"
+alias sha256="shasum -a 256"
+alias sha512="shasum -a 512"
+
+function path() {
+	echo "$PATH"
+}
+
+function mkcd() {
+	mkdir -- "$1" && cd -P -- "$1"
+}
+
+# Searches defined aliases
+function aq() {
+	alias | grep "$@.*=" --color
+}
+
+# Searches defined functions
+function funcs() {
+	declare -F | cut -d ' ' -f 3 | grep "$@" --colo
+}
+
+alias def="declare -f "
+
+function hunt() {
+	if [[ $# -eq 0 ]] ; then
+    	echo "  hunt LOCATION NAME [-type TYPE]"
+    	echo "  hunt / somedir"
+    	echo "  hunt . somefile -type f"
+    	return 0
+	fi
+	LOCATION="$1"
+	shift
+	find "$LOCATION" -name "$@" -print 2>&1 | grep -v "Permission denied\|Not a directory"
+}
+
+function ff() {
+	hunt . "$@" -type f
+}
+function fd() {
+	hunt . "$@" -type d
+}
+function ffo() {
+	ff "$@" | xargs $EDITOR
+}
+function ffg() {
+	ff "$1" | xargs grep -Hn --color "$2"
+}
+function ffs() {
+	ff "$1" | xargs sed -i '' "$2"
+}
+function tg() {
+	tail -f "$1" | grep --line-buffered --color "$2"
+}
+
+function mkcd() {
+	mkdir "$@" && cd "$@"
+}
+
+########################################
+# DevZero
+########################################
+alias a0t='export DEV0_AUTH0_TOKEN=$(auth0 test token -c BlR1iwdHe1x7otl2u0jOfsyRWeGQAqzo -a "https://devinfra.io/webapi" --no-input --force --format json)'
+function sse {
+	taid="${@:-ta-00000000000000000000000000000000}"
+	curl -vvv --request GET \
+		--location "https://api.devinfra.io/api/v0/sse/template_application/$taid/log_output" \
+		--header "Authorization: Bearer $DEV0_AUTH0_TOKEN"
+}
+function ssel {
+	taid="${@:-ta-00000000000000000000000000000000}"
+	curl -vvv --request GET \
+		--location "localhost:8443/api/v0/sse/template_application/$taid/log_output" \
+		--header "Authorization: Bearer $DEV0_AUTH0_TOKEN"
+}
+function cmds {
+	taid="${@:-ta-00000000000000000000000000000000}"
+	curl -vvv --request GET \
+		--location "https://api.devinfra.io/api/v0/sse/template_application/$taid/commands" \
+		--header "Authorization: Bearer $DEV0_AUTH0_TOKEN"
+}
+function cmdsl {
+	taid="${@:-ta-00000000000000000000000000000000}"
+	curl -vvv --request GET \
+		--location "localhost:8443/api/v0/sse/template_application/$taid/commands" \
+		--header "Authorization: Bearer $DEV0_AUTH0_TOKEN"
+}
+alias logs="a0t && sse"
+
+alias dzd="dps --filter 'label=org=devzero'"
+alias dzdl="dpsl --filter 'label=org=devzero'"
+alias mosh="mosh -P 60000"
+function msh {
+	echo "mosh -P 60000 devzero@$@.devinfra.dev0.run"
+	mosh -P 60000 "devzero@$@.devinfra.dev0.run"
+}
+alias tmt='time make test'
+alias tmtq='time make test-quick'
+alias tmts='time make test-short'
+
+########################################
+# NiFi
+########################################
+alias llc="ll conf/"
+alias nfd="sed -i '' 's/#java\.arg\.debug/java.arg.debug/' conf/bootstrap.conf"
+alias nfgo="./bin/nifi.sh start"
+alias nfgov="./bin/nifi.sh start; tail -f logs/nifi-app.log"
+alias nfgovd="nfd && nfgov"
+alias nfkc="nfkl && nfcp"
+alias nfkl="./bin/nifi.sh stop"
+alias nfr="nfkl; sleep 5; nfgov"
+alias nfst="./bin/nifi.sh status"
+alias nph="more conf/nifi.properties | grep 'nifi\.web\.h'"
+alias nps="more conf/nifi.properties | grep 'remote'"
+alias npc="more conf/nifi.properties | grep 'cluster\|zookeeper'"
+alias npw="more conf/nifi.properties | grep 'sensitive\|secur\|assw\|key\|trust\|knox'"
+alias npp="more conf/nifi.properties | grep '^[^#].*port'"
+alias pnf='ps -aef | grep -i nifi'
+alias rmt="find . -type d -name target -exec rm -rv {} \;"
+alias snf="subl conf/nifi.properties"
+alias slg="subl conf/logback.xml"
+alias tla="tail -f logs/nifi-app.log"
+alias tlb="tail -f logs/nifi-bootstrap.log"
+alias tlu="tail -f logs/nifi-user.log"
+alias ut="find . -name 'nifi-app.log' | xargs grep -E 'Controller initialization took'"
+alias xf="gunzip -k conf/flow.xml.gz && subl conf/flow.xml"
+alias xxf="gunzip -c conf/flow.xml.gz | bat"
+alias cca="cat conf/authorizations.xml"
+alias cce="cat conf/authorizers.xml"
+alias ccu="cat conf/users.xml"
+alias sca="subl conf/authorizations.xml"
+alias sce="subl conf/authorizers.xml"
+alias scu="subl conf/users.xml"
+alias rat="more /Users/alopresto/Workspace/nifi/target/rat.txt"
+alias rua="rmf conf/authorizations.xml conf/users.xml"
+
+function nfcp() {
+	if [[ $# -eq 0 ]] ; then
+		DEST="$HOME/Workspace/scratch/flow_backups/flow_$(date +"%Y%m%d-%H%M%S").xml.gz"
+	else
+		DEST="$HOME/Workspace/scratch/flow_backups/flow_$(date +"%Y%m%d-%H%M%S")_$1.xml.gz"
+	fi
+	# echo "Backing up conf/flow.xml.gz to $DEST"
+	cp -v conf/flow.xml.gz "$DEST"
+	unset DEST
+}
+
+# function nfkc() {
+# 	nfkl && nfcp
+# }
+
+function knfa() {
+	kill -9 $(jps | grep NiFi | awk '{print $1}');
+}
+
+########################################
+# MiNiFi
+########################################
+alias mfgo="./bin/minifi.sh start"
+alias mfgov="./bin/minifi.sh start; tail -f logs/minifi-app.log"
+alias mfkl="./bin/minifi.sh stop"
+alias mfst="./bin/minifi.sh status"
+alias pmf='ps -aef | grep -i minifi'
+alias tma="tail -f logs/minifi-app.log"
+alias tmac="tail -f minifi-app.log.txt"
+alias tmb="tail -f logs/minifi-bootstrap.log"
+
+function kmfa() {
+	kill -9 $(jps | grep MiNiFi | awk '{print $1}');
+}
+
+########################################
+# NiFi Registry
+########################################
+alias nrgo="./bin/nifi-registry.sh start"
+alias nrgov="./bin/nifi-registry.sh start; tail -f logs/nifi-registry-app.log"
+alias nrkl="./bin/nifi-registry.sh stop"
+alias nrst="./bin/nifi-registry.sh status"
+alias tra="tail -f logs/nifi-registry-app.log"
+alias trb="tail -f logs/nifi-registry-bootstrap.log"
+alias tru="tail -f logs/nifi-registry-user.log"
+
+########################################
+# Subversion
+########################################
+alias lst="sdf -r PREV"
+alias sci="svn ci"
+alias scif="svn ci -F svn-commit.tmp; rm -rfv svn-commit.tmp"
+alias scim="svn ci -m"
+alias scn="rm -rf ../svn-commit.* svn-commit.*"
+alias sdf="svn diff --internal-diff"
+alias sin="svn info | grep \"Revision\: \d+|$\" --color -E"
+alias sp="svn patch"
+alias stu="svn st -u"
+alias stuc="stu | egrep -e '^.{0,6}C' -A 1"
+alias sup="svn update"
+alias swb="svn switch"
+
+function spp() {
+	svn patch ~/scratch/patches/r14-3/"$@"
+}
+
+function dif() {
+	sdf . > ~/scratch/patches/r14-3/"$@".patch
+	echo "Created ~/scratch/patches/r14-3/$@".patch
+}
+
+########################################
+# Git
+########################################
+
+#alias gday="git log --author=alopresto --pretty=format:\"%h %Cgreen%aD%Creset %s\" | grep '$(date +\'%d %b %Y\')'"
+alias ga="git add"
+alias gam="git commit --amend -s" # Amend with "Signed-off-by: Andy LoPresto <alopresto@apache.org>"
+alias gau="git add -u" # Add modified and deleted but not untracked files
+alias gba="git branch -a"
+alias gbd="git branch -D"
+alias gbl="git branch -l --sort=-committerdate | \grep --color=auto NIFI- | head -n 10"
+alias gbr="git branch"
+alias gbi='git branch -vv | grep $(git branch --show-current)' # Single quotes so the embedded command does not evaluate at alias assignment
+alias gcb="git checkout -b"
+alias gci="git commit -S" # Sign the commit
+alias gcim="git commit -S -m" # Sign and provide inline message
+alias gcl="git clean -df"
+alias gcm="git checkout main"
+alias gcn="git clean -dn" # Dry-run
+alias gco="git checkout"
+alias gcp="git cherry-pick"
+alias gday='glm | grep "$(today)"'
+alias gdc="git diff --cached"
+alias gdiff="git diff"
+alias gdn="gday | sort -r | cut -d ' ' -f 9-" # Puts today\'s commits in a good format for status notes 
+alias gfa="git fetch --all"
+alias gfat="git fetch --all --tags"
+alias gfatp="git fetch --all --tags --prune"
+alias gin="git commit -S --interactive"
+alias gl="git --no-pager logs"
+alias gl2="gl -n 2"
+alias glast="git diff HEAD^ HEAD"
+alias glb="gll --no-merges"
+alias gll="git --no-pager logs -n 1" # Show just the last commit (with signature status)
+alias glm='git --no-pager logs --author=alopresto --pretty=format:"%h %Cred%G?%Creset %Cgreen%aD%Creset %s"'
+alias gln="git --no-pager logs --oneline"
+alias glo="git --no-pager logs --author=alopresto --oneline"
+alias gls="git --no-pager logs -n 10 | cat"
+alias gp="git push"
+alias gpf="git push --force"
+alias gpom="git push origin main"
+alias gpu="git push --set-upstream origin"
+alias gpum="git fetch origin && git pull origin main" # Originally git pull upstream main but now no upstream
+alias grba="git rebase --abort"
+alias grbc="git rebase --continue"
+alias grbi="git rebase -i"
+alias grbm="git rebase main"
+alias grh1="git reset --hard HEAD^1" # Remove the last commit
+alias grh="git reset --hard"
+alias grm="git rm"
+alias grmc="git rm --cached"
+alias grmf="git rm -f"
+alias grr="git branch -r" # Show remote branches only
+alias grv="git remote -v"
+alias gst="git status"
+# alias gsync="git fetch upstream && git fetch apache && git pull upstream main && git push origin main"
+alias gsync="get fetch origin && git pull origin main"
+alias gun="git reset HEAD"
+alias guno="git status -uno" # Ignore untracked files
+
+function gsq() {
+	if [ $# -eq 0 ]; then
+		echo "Usage: gsq 2"
+		echo "    git rebase -i HEAD~2"
+		exit 1
+	fi
+	echo "Rebasing HEAD~$1"
+	git rebase -i "HEAD~$1"
+}
+
+function gsw() {
+	echo "Switching to branch NIFI-$@..."
+	# git fetch --all
+	BRANCH="NIFI-$@"
+	git branch | grep -w "$BRANCH" > /dev/null
+	if [ $? = 0 ]; then
+		git checkout "$BRANCH"
+	else
+		git checkout main
+		git pull upstream main
+		git checkout -b "$BRANCH"
+	fi
+}
+
+function gpr() {
+	echo "Fetching and checking out new git branch pr$@..."
+	git fetch --all --tags > /dev/null
+	git checkout main > /dev/null
+	git pull upstream main > /dev/null
+	git checkout  -b "pr$@" "upstream/pr/$@"
+	gll
+}
+
+function gpp() {
+	PR_NUM=`gst | grep -Ei 'pr\d+' | grep -oEi '\d+'`
+	git pull upstream "pull/$PR_NUM/head"
+}
+
+function gtag() {
+	echo "Checking out tag $1 as branch"
+	git checkout "tags/$1" -b "branch_$1"
+}
+
+# make function gpub that detects current branch name and performs "gpu $BRANCH"
+
+function shas () {
+	# if [[ $# -eq 0 ]] ; then
+	# 	echo "  Usage: shas"
+	# 	echo "  This command will find all *.tar.gz and *.zip files in the directory and generate SHA-256 and SHA-512 checksums for each"
+	# 	return 0
+	# fi
+
+	for file in *.zip *.tar.gz; do
+		[ -e "$file" ] || continue
+		# Refactor to loop with 256, 512
+		shasum -a 256 "$file" | cut -d" " -f1 > "$file.sha256"
+		shasum -a 512 "$file" | cut -d" " -f1 > "$file.sha512"
+		echo "$file -> $file.sha256, $file.sha512"
+	done
+
+	ls -al
+}
+
+# TODO: Implement
+function verify_shas() {
+	# if [[ $# -eq 0 ]] ; then
+	# 	echo "  Usage: verify_shas <artifact>"
+	# 	echo "  This command will ensure there are valid GPG signatures, SHA-256, and SHA-512 checksums for the provided artifact"
+	# 	echo "  If no argument is provided, it will iterate over all *.zip and *.tar.gz in the directory"
+	# 	return 0
+	# fi
+
+	# TODO: Add -r option to recurse sub-directories
+
+	for file in *.zip *.tar.gz; do
+		[ -e "$file" ] || continue
+		# Refactor to loop with 256, 512
+		shasum -a 256 "$file" | cut -d" " -f1 > "$file.sha256"
+		shasum -a 512 "$file" | cut -d" " -f1 > "$file.sha512"
+		echo "$file -> $file.sha256, $file.sha512"
+	done
+
+	ls -al
+}
+
+function restore_intellij() {
+	if [[ $# -eq 0 ]] ; then
+		echo "  Usage: restore_intellij path/to/backup/ path/to/current_nifi/"
+		echo "  This command will copy all *.iml files and .idea directory to the current NiFi source tree"
+		return 0
+	fi
+
+	LAUNCH_DIR=`pwp`
+
+	# Extract to function
+	if [[ ! -e "$1" ]]; then
+		echo "Cannot find directory $1"
+		return 1
+	fi
+
+	SRC=`cd "$1"; pwp`
+	echo "Resolved $1 to $SRC"
+	cd "$LAUNCH_DIR"
+
+	if [[ ! -e "$2" ]]; then
+		echo "Cannot find directory $2"
+		return 1
+	fi
+
+	DEST=`cd "$2"; pwp`
+	echo "Resolved $2 to $DEST"
+	cd "$LAUNCH_DIR"
+
+	# Copy the IntelliJ .idea directory
+	IDEA_DIR="$SRC/.idea"
+	if [[ ! -e "$IDEA_DIR" ]]; then
+    	echo "No .idea directory detected at $IDEA_DIR"
+    	return 1
+	fi
+
+	# Don't need .idea on the destination
+	cp -rv "$IDEA_DIR" "$DEST"
+
+	# Option 1
+	cd "$SRC"
+	shopt -s globstar
+	# cp is aliased to extra options, so use the raw command
+	rsync -Rv **/*.iml "$DEST"
+	cd "$LAUNCH_DIR"
+}
+
+########################################
+# Vagrant
+########################################
+alias sv="subl Vagrantfile"
+alias vadd="vagrant box add"
+alias vd="vagrant destroy"
+alias vhalt="vagrant halt"
+alias vinit="vagrant init"
+alias vrp="vagrant reload --provision"
+alias vssh="vagrant ssh"
+alias vstat="vagrant status"
+alias vup="vagrant up"
+
+########################################
+# Docker
+########################################
+alias docker="nocorrect docker" # Zsh aggressively tries to correct `docker` to `.docker`
+alias da="docker attach"
+alias dbld="docker build -t"
+alias dh="docker history"
+alias di="docker images"
+alias dk="docker stop" # Docker kill <name>
+alias dm="docker-machine"
+alias dmc="docker-machine create --driver virtualbox"
+alias dme="docker-machine env"
+alias dmls="docker-machine ls"
+alias dockn="docker run -it ubuntu:latest /bin/bash"
+alias dp="docker pull"
+alias dpsl="docker ps --format 'table {{.Names}}\t{{.Image}}\t{{.ID}}\t{{.Ports}}\t{{.Command}}\t{{.Status}}'"
+alias dps="docker ps --format 'table {{.Names}}\t{{.Image}}\t{{.ID}}\t{{.Status}}'"
+# alias dpsp="docker ps --format 'table {{.Names}}
+#   \t{{.Image}}
+#     {{with $p := split .Ports \", \"}}
+#       {{range $p}}\t\t{{println .}}{{end}}
+#     {{end}}
+#   \t{{.Status}}'"
+alias dpsa="dps -a"
+alias dr="docker run -it"
+alias drm="docker rm"
+alias drma="docker ps -a -q | xargs docker rm"
+alias drmi="docker rmi"
+alias drmia="docker images -q | xargs docker rmi"
+alias dsa='docker stop $(docker ps -aq)'
+alias dt="docker tag"
+alias sd="subl Dockerfile"
+
+# Prints the open ports and IP address of the specified container
+function dip() {
+	docker inspect "$@" | jq -f ~/.docker_host_and_ports.jq
+}
+
+function dsh {
+	eval "$(docker-machine env $@)"
+}
+
+function drun {
+	"docker run -it $@ /bin/bash"
+}
+
+function dock {
+	if [[ $# -eq 0 ]] ; then
+		echo "  Usage: dock 'repo:tag' [path/to/Dockerfile]"
+		echo "  If path to Dockerfile is omitted, '.' will be used"
+		echo "  This command will build the image, display the history, and then run the container"
+		return 0
+	fi
+
+	tagname="$1"
+	if [[ $# -gt 1 ]] ; then
+		dockerfile="$2"
+	else
+		dockerfile="."
+	fi
+
+	echo "docker build -t '$tagname' $dockerfile; docker history <image>; docker run -it <image>"
+	docker build -t "$@" .
+	imageid=$(di -q | head -1)
+	docker history "$imageid"
+	docker run -it "$imageid"
+}
+
+########################################
+# Maven
+########################################
+alias mcc="mvn clean compile"
+alias mci="mvn clean install"
+alias mcin="mvn clean install -N"
+alias mck="mvn checkstyle:check"
+alias mcp="mvn clean package"
+alias mct="mvn clean test"
+alias mdr="mvn dependency:resolve -U"
+
+function mst() {
+	echo "mvn $@ -DskipTests"
+	mvn "$@" -DskipTests
+}
+
+alias mist="mst clean install"
+alias fist="mst clean install -T2.0C"
+alias fisto="fist --offline"
+
+function mmt() {
+	echo "mvn $@ -T2.0C"
+	mvn "$@" -T2.0C
+}
+
+alias mcip="mvn clean install -Pcontrib-check -Pavoid-archive-formats -Dsurefire.skipAfterFailureCount=1"
+alias mcipa="mcip -rf"
+alias mcipg="mcip -Pinclude-grpc"
+alias mcpp="mvn clean package -Pcontrib-check"
+alias mmci="mmt clean install"
+alias mmct="mmt clean test"
+alias mop="mvn install -Pcontrib-check --offline"
+alias mrel="mcipg -T2.0C -P\!avoid-archive-formats"
+
+# Skip tests on contrib-check
+alias mstcp="mst clean install -Pcontrib-check -Pavoid-archive-formats"
+
+# Quick build
+alias mqi="mmt clean install -DskipTests -Pavoid-archive-formats"
+alias mqio="mqi --offline"
+alias mfast="mmt install -Pavoid-archive-formats && mvn checkstyle:check"
+
+# Run with jenv Java version
+alias jmci="jenv exec mvn clean install -Pinclude-grpc"
+alias jmfg="jmci -T2.0C"
+
+function paths() {
+	echo 'Determining Java environment...'
+	java_location=$(which java)
+	java_num_version
+	echo "Java: $java_location $java_num_version $JAVA_HOME"
+
+	echo 'Determining Maven environment...'
+	maven_location=$(which mvn)
+	maven_version=$(mvn -v 2>&1 | sed 's/Apache Maven \(.*\) /\1/; 1q')
+	echo "Maven: $maven_location $maven_version $M3_HOME"
+}
+
+function paths_long() {
+	echo 'Determining Java environment...'
+	echo "Java executable location: `which java`"
+	java_home
+	echo "Java version: " && $(java -version)
+
+	echo 'Determining Maven environment...'
+	echo "Maven executable location: `which mvn`"
+	mvn_home
+	echo "Maven version: `mvn -v`"
+}
+
+java_num_version() {
+	java_num_version=$(java -version 2>&1 | sed -n ';s/.* version "\(.*\)\.\(.*\)\..*".*/\1\2/p;')
+}
+
+mvn_home() {
+	if [[ -L $M3_HOME ]]; then
+		resolved_m3_home=$(readlink $M3_HOME)
+		echo "Maven home: $M3_HOME -> $resolved_m3_home"
+	else
+		echo "Maven home: $M3_HOME"
+	fi
+}
+
+java_home() {
+	if [[ -L $JAVA_HOME ]]; then
+		resolved_java_home=$(readlink $JAVA_HOME)
+	else
+		resolved_java_home="$JAVA_HOME"
+	fi
+}
+
+java_security_path() {
+	java_home
+	java_num_version
+
+	if [[ "$java_num_version" -gt 18 ]]; then
+		java_security_path="conf/security/java.security"
+	else 
+		java_security_path="jre/lib/security/java.security"
+	fi 
+
+	java_security_path="$resolved_java_home/$java_security_path"
+	echo $java_security_path
+}
+
+jdk_tls_disabled_algorithms() {
+	java_security_path
+	echo "JAVA_HOME=$JAVA_HOME"
+	echo "         =$resolved_java_home"
+
+	java -version
+	echo "Numeric version: $java_num_version"
+
+	grep -A 2 "jdk.tls.disabledAlgorithms" "$java_security_path"
+}
+
+function jce_limit_check() { 
+	# set -x
+	# Returns 0 if UNLIMITED; 1 if LIMITED
+	jrunscript -e 'exit (javax.crypto.Cipher.getMaxAllowedKeyLength("AES") < 256);'
+	result=$?
+	# echo "exit: $result"
+	# Translate to text
+	JCE_UNLIMITED=$([ "$result" = "0" ] && echo "UNLIMITED" || echo "LIMITED")
+
+	# echo "JCE: $JCE_UNLIMITED"
+	# set +x
+	return $result
+}
+
+function jce_key_length() {
+	jrunscript -e 'print("The maximum key length for AES encryption is " + javax.crypto.Cipher.getMaxAllowedKeyLength("AES") + " bits");'
+}
+
+function install_iterm2_shell_integration() {
+	curl -L https://iterm2.com/misc/install_shell_integration.sh | bash
+}
+
+########################################
+# Kubernetes
+########################################
+alias k="kubectl"
+
+# Actions
+alias kaf="kubectl apply -f" # kaf pod.yaml
+alias kcf="kubectl create -f" # kcf pod.yaml
+alias kr="kubectl run"
+
+# Config (x)
+alias kx="kubectl config view" 						  # Show merged kubeconfig settings
+# use multiple kubeconfig files at the same time and view merged config
+# KUBECONFIG=~/.kube/config:~/.kube/kubconfig2 kubectl config view
+alias kxc="kubectl config current-context"               # Display the current-context
+alias kxu="kubectl config use-context"  				  # set the default context to my-cluster-name
+
+# Get (g)
+alias kgd="kubectl get deployment"   # kbgd my-name       # List a particular deployment
+alias kgn="kubectl get nodes"
+alias kgp="kubectl get pods --all-namespaces"             # List all pods in all namespaces
+alias kgpa="kubectl get pods --include-uninitialized"     # List all pods in the namespace, including uninitialized ones
+alias kgpl="kubectl get pods -o wide"                     # List all pods in the namespace, with more details
+alias kgpr="kubectl get pods --field-selector=status.phase=Running" # List all running pods in the namespace
+alias kgr="kubectl get rc"
+alias kgrl="kubectl get rc -o wide"                       # List all RC in the namespace, with more details
+alias kgs="kubectl get services"                          # List all services in the namespace
+alias kgss="kubectl get services --sort-by=.metadata.name" # List Services Sorted by Name
+
+# Describe (l)
+alias klp="kubectl describe pods" # kblp my-pod
+alias kln="kubectl describe nodes" # kbln my-node
+alias klr="kubectl describe rc" # kblr my-rc
+alias klr="kubectl describe svc" # kblr my-svc
+
+# Get ExternalIPs of all nodes
+alias kip="kubectl get nodes -o jsonpath='{.items[*].status.addresses[?(@.type==\"ExternalIP\")].address}'"
+
+function kpw() {
+	kubectl config view -o jsonpath='{.users[?(@.name == "$1")].user.password}' # Get the password for the user
+}
+
+function kgps() {
+	# Get the version label of all pods with label app=$1
+	kubectl get pods --selector=app="$1" rc -o \
+	  jsonpath='{.items[*].metadata.labels.version}'
+}
+
+########################################
+# Minikube
+########################################
+alias mk="minikube"
+alias mkgo="minikube start"
+alias mkgx="minikube start --vm-driver=xhyve" # Run with xhyve VM
+alias mkkl="minikube stop"
+alias mkrm="minikube delete"
+alias mkv="minikube version"
+alias mkd="minikube dashboard"
+
+
+########################################
+# Directory Stacking
+########################################
+# An enhanced 'cd' - push directories
+# onto a stack as you navigate to it.
+#
+# The current directory is at the top
+# of the stack.
+#
+function stack_cd {
+	if [ "$1" ]; then
+		# use the pushd bash command to push the directory
+		# to the top of the stack, and enter that directory
+		pushd "$1" > /dev/null
+	else
+		# the normal cd behavior is to enter $HOME if no
+		# arguments are specified
+		pushd "$HOME" > /dev/null
+	fi
+}
+# the cd command is now an alias to the stack_cd function
+#
+cd() {
+	if [[ "$@" = '-P ..' ]]; then
+		# resolve the symlink first, then execute stack_cd
+		ONEUP=`pwd -P | rev | cut -d / -f 2- | rev`
+		if [ "$ONEUP" ]; then
+			TARGET="$ONEUP"
+		else
+			TARGET="$2"
+		fi
+		stack_cd "$TARGET"
+		return
+	fi
+	# cd is aliased to stack_cd
+	stack_cd "$@"
+}
+# Swap the top two directories on the stack
+#
+function swap {
+	pushd > /dev/null
+}
+# s is an alias to the swap function
+alias s=swap
+# Pop the top (current) directory off the stack
+# and move to the next directory
+#
+function pop_stack {
+	popd > /dev/null
+}
+alias p=pop_stack
+
+# Displays a numbered list of recent directories (excluding duplicates)
+# alias d="dirs -v | sort -k 2 | uniq +4 | sort | head -n 21"
+alias d="dirs -v | sort -k 2 -u | head -n 21 | sort"
+
+# Display the stack of directories and prompt
+# the user for an entry.
+#
+# If the user enters 'p', pop the stack.
+# If the user enters a number, move that
+# directory to the top of the stack
+# If the user enters 'q', don't do anything.
+#
+function display_stack
+{
+	d
+	echo -n "#: "
+	read dir
+	if [[ "$dir" = 'p' ]]; then
+		pushd > /dev/null
+	elif [[ "$dir" != 'q' ]]; then
+		d=$(dirs -l +"$dir");
+		popd +"$dir" > /dev/null
+		pushd "$d" > /dev/null
+	fi
+}
+alias ds=display_stack
+
+alias cd..="cdp .."
+alias cdp="cd -P"
+# alias up="cd.."
+alias gb="p"
+
+function up() {
+	if [ "x$@" = "x" ]; then
+		cd ..
+	elif [ "$@" -eq "$@" ] 2>/dev/null; then
+		uppath=$(perl -E "print '../' x $@")
+		echo "cd $uppath"
+		cd "$uppath"
+	else
+		echo "Usage: up [n]"
+		echo "  up   goes 1 level up - cd ../"
+		echo "  up 4 goes 4 levels up - cd ../../../../"
+	fi
+}
+
+########################################
+# Imported aliases & functions from 
+# ~/.bashrc 2020-03-28
+########################################
+
+########################################
+# General aliases & functions specific to Andy
+########################################
+function sshs() {
+    ssh $@ "cat > /tmp/.bashrc_temp" < ~/.bashrc_remote
+    ssh -t $@ "bash --rcfile /tmp/.bashrc_temp ; rm /tmp/.bashrc_temp"
+}
+
+function vsshs() {
+	vagrant ssh "$@" -c "cat > /tmp/.bashrc_temp" < ~/.bashrc_remote
+    vagrant ssh "$@" -c "bash --rcfile /tmp/.bashrc_temp ; rm /tmp/.bashrc_temp"
+}
+alias vssh="vsshs"
+
+# alias ref="cp ~/.bash_profile ~/Dropbox/. && \
+#         cp ~/.bashrc_remote ~/Dropbox/. && \
+#         cp ~/.bashrc ~/Dropbox/. && \
+#         set -T && \
+#         source ~/.bash_profile && \
+#         source ~/.bashrc_remote && \
+#         source ~/.bashrc && \
+#         echo 'Refreshed ~/.bash_profile, ~/.bashrc_remote, and ~/.bashrc and copied to Dropbox'"
+
+# alias refl="set -T && \
+#         source ~/.bash_profile && \
+#         source ~/.bashrc_remote && \
+#         source ~/.bashrc && \
+#         echo 'Refreshed ~/.bash_profile, ~/.bashrc_remote, and ~/.bashrc (not copied to Dropbox)'"
+alias refl="rehash && source ~/.zshrc"
+
+# alias subl="sublime"
+alias bb="bbedit"
+alias sb="subl"
+# alias tn="~/bin/terminal-notifier-1.5.0/terminal-notifier.app/Contents/MacOS/terminal-notifier -activate com.googlecode.iTerm2 -sender com.googlecode.iTerm2"
+alias con="tail -40 -f /var/log/system.log"
+alias ox="od -Ax -c"
+alias sox="od -Ax -N32 -c"
+alias sxxd="xxd -len 32"
+
+alias s="eval `ssh-agent`"
+
+alias bca="bat conf/authorizations.xml"
+alias bce="bat conf/authorizers.xml"
+alias bcu="bat conf/users.xml"
+alias bnf="bat conf/nifi.properties"
+alias bbc="bat conf/bootstrap.conf"
+
+alias gla="grc tail -f logs/nifi-app.log"
+alias glb="grc tail -f logs/nifi-bootstrap.log"
+alias glu="grc tail -f logs/nifi-user.log"
+
+alias finder="open -R ."
+# alias scratch="cd ~/Workspace/scratch"
+
+alias kt="keytool -list -v -keystore"
+function kta() {
+  keytool -list -v -alias "$1" -keystore "$2"
+}
+alias p12="keytool -list -v -storetype PKCS12 -keystore"
+
+alias vcsr="opensl req -text -noout -verify -in"
+
+function vcrt() {
+  openssl x509 -in "$@" -text -noout
+}
+function pcrt() {
+  openssl x509 -purpose -in "$@" -inform PEM
+}
+function vkey() {
+  openssl rsa -in "$@" -text -noout
+}
+function vchain() {
+  openssl crl2pkcs7 -nocrl -certfile "$@" | openssl pkcs7 -print_certs -text -noout
+}
+
+function jks2pkcs12() {
+  JKS="$1"
+  P12="${JKS%.*}.p12"
+  echo "Converting $JKS (JKS) to $P12 (PKCS12)"
+  read -s -p "Source Keystore ($JKS) Password: " JKS_PASSWORD
+  echo ""
+  ALIAS="$3"
+  if [ -z "$3" ]; then
+    ALIAS="nifi-key"
+  fi
+  read -s -p "Destination Keystore ($P12) Password: " P12_PASSWORD
+  echo ""
+  keytool -importkeystore -srckeystore "$JKS" -destkeystore "$P12" \
+  -srcstoretype JKS -deststoretype PKCS12 \
+  -destkeypass "$P12_PASSWORD" -deststorepass "$P12_PASSWORD" -srcstorepass "$JKS_PASSWORD" \
+  -srcalias "$ALIAS" -destalias "$ALIAS"
+  unset JKS_PASSWORD
+  unset P12_PASSWORD
+  echo "Generated $P12"
+  unset JKS
+  unset P12
+  unset ALIAS
+}
+
+function export_client() {
+  echo "Exporting client certificate and key from $1"
+  read -s -p "Keystore Password: " PASSWORD
+  openssl pkcs12 -in "$1" -out client.der -nodes -password "pass:$PASSWORD"
+  openssl pkcs12 -in "$1" -nodes -nocerts -out client.key -password "pass:$PASSWORD"
+  unset PASSWORD
+  # Sometimes the certificate was encoded in PEM already; if so, the BEGIN line will be present
+  if [ "$(grep -e '-----BEGIN CERTIFICATE-----' client.der -F -c)" -gt 0 ]; then
+    # Remove the private key from the public cert
+    perl -pe 'BEGIN{undef $/;} s|-----BEGIN PRIVATE KEY-----.*?-----END PRIVATE KEY-----|Removed private key|gs' client.der > client.pem
+  else
+    openssl x509 -inform der -in client.der -out client.pem
+  fi
+  ll client.*
+}
+
+function sclin() {
+  set -vx
+  echo "Q" | openssl s_client -connect localhost:9443 -debug -state -CAfile nifi-cert.pem
+  set +vx
+}
+
+function sclinc() {
+  set -vx
+  echo "Q" | openssl s_client -connect localhost:9443 -debug -state -CAfile nifi-cert.pem -cert client.pem -key client.key
+  set +vx
+}
+
+function wifipass() {
+  security find-generic-password -ga "$@" | grep password
+}
+
+# Tomcat scripts
+# alias ts="./startserver.sh"
+# alias tj="./startserver.sh jpda"
+# alias tp="./stopserver.sh"
+
+#Spotlight scripts
+# alias spoff="echo 'sudo mdutil -a -i off' && sudo mdutil -a -i off"
+# alias spon="echo 'sudo mdutil -a -i on' && sudo mdutil -a -i on"
+
+# # Runs a long command and provides a Growl notification on completion
+# function n() {
+#   long_timer=${long_timer:-$SECONDS}
+#   "$@"
+#   status=$?
+#   long_timer_show=$(($SECONDS - $long_timer))
+#   cmd="$@"
+  
+#   if [ "$status" == "0" ] ; then
+#       result="completed"
+#   else
+#       result="FAILED ($status)"
+#   fi
+
+#   # growlnotify -m "Script $result in ${long_timer_show}s" -s -t "$cmd" -n "iTerm" -a "/Applications/iTerm.app" || return 1;
+#   tn -message "Script $result in ${long_timer_show}s" -title "iTerm" -subtitle "$cmd"
+#   unset long_timer
+# }
+
+# # Runs a long command in the background and provides a Growl notification on completion
+# function nbg() {
+#   n "$@" &
+#   say "Command finished"
+# }
+
+# # Provides a notification after any command which took longer than 1 minute to execute
+# beep_if_long_time_past() {
+#     LAST_COMMAND_DURATION=$(($(date +%s) - ${LAST_COMMAND_TIME}))
+#     [[ ${LAST_COMMAND_DURATION} -gt 60 ]] && { echo "Took long, didn't it?" ; notify-send "I'm done after ${LAST_COMMAND_DURATION} seconds!"; }
+#     export LAST_COMMAND_TIME=
+# }
+
+# function dash() {
+# 	open dash://"$@"
+# }
+
+alias ss="/System/Library/Frameworks/ScreenSaver.framework/Resources/ScreenSaverEngine.app/Contents/MacOS/ScreenSaverEngine -background &"
+
+alias pf="open ."
+
+function pup() {
+	echo "sudo port -v selfupdate"
+	sudo port -v selfupdate
+}
+
+# function jardiff() {
+#   java -jar ~/bin/jardiff.jar "$@";
+# }
+
+# Generates a file containing the SHA-256 hash and filename of every Nar/Jar/War in the provided directory
+function sha256dir() {
+  hashfile=$(echo "$1" | sed s_/_-_g)
+  echo "$1" > "$hashfile.sha256"
+  for binary in $(find "$1" -type f -name "*.[jwn]ar"); do
+    echo $(shasum -a 256 "$binary" | cut -d " " -f1) "$(basename $binary)" >> "$hashfile.sha256"
+  done
+}
+
+########################################
+# NiFi
+########################################
+# alias sw10="rmf /Users/alopresto/Workspace/nifi/nifi-nar-bundles/nifi-framework-bundle/nifi-framework/nifi-cluster-authorization-provider/; rmf /Users/alopresto/Workspace/nifi/nifi-nar-bundles/nifi-framework-bundle/nifi-framework/nifi-file-authorization-provider/; rmf /Users/alopresto/Workspace/nifi/nifi-nar-bundles/nifi-framework-bundle/nifi-framework/nifi-framework-cluster-web/target/"
+# alias sw0x="rmf /Users/alopresto/Workspace/nifi/nifi-nar-bundles/nifi-framework-bundle/nifi-framework/nifi-file-authorizer/; rmf /Users/alopresto/Workspace/nifi/nifi-nar-bundles/nifi-framework-bundle/nifi-framework/nifi-framework-authorization/"
+# alias n="cd ~/Workspace/nifi"
+
+# function run_nifi_from_build() {
+#   echo "Running NiFi $1 from build"
+#   # Check directory existence
+#   cd "nifi-assembly/target/nifi-$1-SNAPSHOT-bin/nifi-$1-SNAPSHOT"
+#   ./bin/nifi.sh start
+#   sleep 5000
+#   # Get hostname & port from nifi.properties
+#   open "http://localhost:8080"
+# }
+
+# alias nf10="run_nifi_from_build 1.0.0"
+# alias nf07="run_nifi_from_build 0.7.0"
+
+# alias fl="ls -t ~/Workspace/scratch/flow_backups/flow_* | head -11"
+# alias fx="gunzip -k conf/flow.xml.gz && subl conf/flow.xml"
+
+# Toolkit dev
+# alias casr='java -cp classpath:lib/* org.apache.nifi.toolkit.tls.v2.server.CAServerRunner'
+
+# function flow() {
+#   echo "Restoring NiFi flow"
+#   if [ -f conf/flow.xml.gz ]; then
+#     echo "Backing up conf/flow.xml.gz"
+#     cpr conf/flow.xml.gz conf/flow_backup.xml.gz
+#   fi
+#   LATEST_FILE=$(ls -t ~/Workspace/scratch/flow_backups/flow_* | head -1)
+#   cpr "$LATEST_FILE" "conf/flow.xml.gz"
+#   unset LATEST_FILE
+# }
+
+########################################
+# Hashcat
+########################################
+# alias hcat="~/Dropbox/bin/hashcat-0.50/hashcat-cli64.app"
+
+########################################
+# OpenSSL
+########################################
+# Nervous about changing system openssl from 0.9.8zg but need GCM ciphers
+# alias ossl="/usr/local/opt/openssl/bin/openssl"
+alias oscurl="/usr/local/opt/curl/bin/curl" # Built with OpenSSL instead of SecureTransport (can use PEM)
+
+########################################
+# Subversion
+########################################
+# export EDITOR="bbedit -w --resume"
+# export SVN_EDITOR="bbedit -w --resume"
+export EDITOR="subl"
+export SVN_EDITOR="subl -w -n"
+
+########################################
+# Git
+########################################
+# Use HomeBrew version (updated from system)
+# alias git="/usr/local/bin/git"
+alias config='/usr/bin/git --git-dir=$HOME/.cfg/ --work-tree=$HOME'
+
+########################################
+# Java
+########################################
+# Add jenv path
+# export JAVA_HOME=/System/Library/Frameworks/JavaVM.framework/Versions/CurrentJDK/Home
+PATH=${HOME}/.jenv/bin:${PATH}
+if which jenv > /dev/null; then eval "$(jenv init -)"; fi
+# export JENV_ROOT=/usr/local/opt/jenv
+
+# export JAVA_HOME="$HOME/.jenv/versions/`jenv version-name`"
+alias jenv_set_java_home='export JAVA_HOME="$HOME/.jenv/versions/`jenv version-name`" && echo "JAVA_HOME=$JAVA_HOME"'
+alias jjh="jenv version && jenv macos-javahome && jenv_set_java_home && jenv doctor"
+# export JAVA_OPTS="-Dlog4j.configuration=src/main/resources/log4j.properties -Dfile.encoding=UTF8"
+export JAVA_OPTS="-Dfile.encoding=UTF8"
+export TOMCAT_HOME=$HOME/bin/tomcat
+PATH=${JAVA_HOME}/bin:${PATH}
+
+alias jv="java -version"
+alias jh="resolved_java_home=java_home && echo $resolved_java_home"
+alias js="java_security_path"
+alias sjs="sudo sublime $(java_security_path)"
+alias jdktls="jdk_tls_disabled_algorithms"
+alias jpm="jenv disable-plugin maven && jenv enable-plugin maven"
+alias je="jenv exec"
+
+# Add a new JDK to jEnv and rehash
+function jup() {
+  if [[ $# -eq 0 ]] ; then
+      echo "  jup JDK_version"
+      echo "  jup 1.8.0_92"
+      return 0
+  fi
+  LOCATION="/Library/Java/JavaVirtualMachines/jdk$1.jdk/Contents/Home/"
+  jenv add "$LOCATION"
+  jenv rehash
+  jenv versions
+  java -version
+}
+
+# Functions to enable/disable unlimited strength cryptography jurisdiction in Java
+# function jce_unlimited() {
+#   echo "Enabling JCE unlimited strength crypto policy"
+#   resolve_java_home
+#   sec_path="$resolved_java_home/jre/lib/security/."
+#   yes | cp -avf /Users/alopresto/Desktop/security/unlimited/*.jar "$sec_path"
+#   JCE_UNLIMITED=""
+#   jce_limit_check
+# }
+
+# function jce_limited() {
+#   echo "Disabling JCE unlimited strength crypto policy"
+#   resolve_java_home
+#   sec_path="$resolved_java_home/jre/lib/security/."
+#   yes | cp -avf /Users/alopresto/Desktop/security/limited/*.jar "$sec_path"
+#   JCE_UNLIMITED=""
+#   jce_limit_check
+# }
+
+function resolve_java_home() {
+  if [[ -L $JAVA_HOME ]]; then
+    resolved_java_home=$(readlink $JAVA_HOME)
+  else
+    resolved_java_home="$JAVA_HOME"
+  fi
+}
+
+########################################
+# Maven
+########################################
+# export M2_HOME=$(which mvn)
+# export M2_HOME=~/bin/apache-maven-3.0.5
+# export M2=${M2_HOME}/bin
+
+function resolve_mvn_home() {
+  if [[ -L $M3_HOME ]]; then
+    resolved_mvn_home=$(readlink $M3_HOME)
+  else
+    resolved_mvn_home="$M3_HOME"
+  fi
+}
+
+export M3_HOME="/usr/local/Cellar/maven/3.6.1/libexec/"
+# export MAVEN_OPTS="-Xms1024m -Xmx3076m -XX:MaxPermSize=256m"
+export MAVEN_OPTS="-Xms1024m -Xmx3076m -DskipAfterFailureCount=false -XX:+TieredCompilation -XX:TieredStopAtLevel=1"
+export PATH=$PATH:${M3}
+
+mgroovy() {
+	mvn archetype:generate -DgroupId="$1" -DartifactId="$2" -DarchetypeArtifactId=gmaven-archetype-basic -DarchetypeGroupId=org.codehaus.gmaven.archetypes -DinteractiveMode=false
+}
+
+# function gpd() {
+# # 	GPD_DIR=`find ~ -name "ParallelDownloader.groovy"`
+# 	mvn exec:java -Dexec.args="$@"
+# }
+function clean() {
+	find "$1" -name target -type d -print | xargs rm -rfv
+} 
+
+########################################
+# Groovy & Grails
+########################################
+# export JAVA_OPTS="${JAVA_OPTS} -XX:MaxPermSize=256m"
+# export GRAILS_HOME=~/.gvm/grails/current/bin/grails
+# export GROOVY_HOME=~/.gvm/groovy/current/bin/groovy
+# export GRADLE_HOME=~/.gvm/gradle/current/bin/gradle
+PATH=${PATH}:${GRAILS_HOME}/bin:${GROOVY_HOME}/bin:${GRADLE_HOME}/bin
+
+# function grailsTestOrder() {
+#     grep testsuite target/surefire-reports/ | grep -v testsuites | cut -d\  -f8-9 | sed -E 's/name="(.*)" package="(.*)"/\2.\1/' | grep .
+# }
+
+# alias testorder=grailsTestOrder
+
+########################################
+# DyLib
+########################################
+export DYLD_LIBRARY_PATH=~/lib
+
+########################################
+# MySQL
+########################################
+export PATH="/usr/local/mysql/bin:$PATH"
+
+########################################
+# Scala
+########################################
+export SCALA_HOME="$(which scala | rev | cut -d\/ -f3- | rev)"
+export SCALA_BIN=${SCALA_HOME}/bin
+export PATH=$PATH:${SCALA_BIN}
+
+########################################
+# AWS CLI/Python
+########################################
+PATH=~/Library/Python/3.6/bin/:${PATH}
+if command -v pyenv 1>/dev/null 2>&1; then
+  eval "$(pyenv init -)"
+fi
+
+########################################
+# General Path Munging
+########################################
+PATH=~/bin:/usr/local/bin:/usr/local/ssl/bin:${PATH}
+# Add openssl from brew before OS version
+export PATH="/usr/local/opt/openssl@1.1/bin:$PATH"
+
+# Brew is now installed to a different directory
+export PATH="/Users/andylopresto/homebrew/bin:$PATH"
+
+# Clean up duplicates in PATH
+# export PATH=/usr/local/bin:/opt/local/bin:/opt/local/sbin:$PATH
+export PATH=/usr/local/bin:$PATH
+PATH="$(tr ':' $'\n' <<< $(echo $PATH) | sort -u -f | awk -v ORS=: '{ print $1 }')"
+# Remove trailing ':'
+export PATH="/usr/local/bin${PATH%?}"
+
+# Add Sublime Text (do this after removing duplicates because of the space in the path)
+export PATH="/Applications/Sublime\ Text.app/Contents/SharedSupport/bin:$PATH"
+
+alias subl="/Applications/Sublime\ Text.app/Contents/SharedSupport/bin/subl"
+
+########################################
+# Hashicorp Boundary
+########################################
+alias b="boundary"
+
+########################################
+# Golang
+########################################
+export PATH="/usr/local/go/bin:$PATH"
+
+########################################
+# GPG
+########################################
+# Export TTY for GPG
+export GPG_TTY="$(tty)"
+
+# Commands for alternate keyring file
+alias gpga="gpg --no-default-keyring --keyring"
+alias gpgat="gpg --no-default-keyring --keyring test-keyring.gpg"
+
+# Verbose listing of fingerprints (second invocation provides subkey fingerprints)
+alias gpgf="gpg --fingerprint --fingerprint --list-sigs -vv"
+
+# Verbose listing of fingerprints and signatures of provided keyring file
+function gpgaf() {
+  gpg --no-default-keyring --keyring "$@" --fingerprint --fingerprint --list-sigs -vv
+}
+
+complete -C /usr/local/bin/vault vault
+if command -v pyenv 1>/dev/null 2>&1; then
+  eval "$(pyenv init -)"
+fi
+
+# Configuring YubiKey for SSH (2023-01-02)
+
+# Old way
+# export SSH_AUTH_SOCK="/run/user/$UID/gnupg/S.gpg-agent.ssh"
+# gpg-connect-agent updatestartuptty /bye > /dev/null
+
+# Modern way
+export SSH_AUTH_SOCK=$(gpgconf --list-dirs agent-ssh-socket)
+gpgconf --launch gpg-agent
+
+# set -e SSH_AUTH_SOCK
+# set -U -x SSH_AUTH_SOCK ~/.gnupg/S.gpg-agent.ssh
